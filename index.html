@@ -1,1264 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ABAC Questions</title>
-  <style>
-    :root {
-      --bg: #f8f6f2;
-      --surface: #fffdf9;
-      --card: #ffffff;
-      --border: #e8e1d8;
-      --text: #1f1f1f;
-      --muted: #6f6a64;
-      --accent: #a6192e;
-      --accent-dark: #861324;
-      --accent-soft: #f7d9de;
-      --success-bg: #f5f1eb;
-      --debug-bg: #161616;
-      --debug-text: #d7ffe8;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-      --radius: 16px;
-
-      --correct-border: #2f8f46;
-      --correct-bg: #eef9f1;
-      --correct-soft: #dff2e5;
-      --correct-text: #1f6a31;
-
-      --incorrect-border: #d94b5c;
-      --incorrect-bg: #fff4f5;
-      --incorrect-soft: #ffe2e6;
-      --incorrect-text: #9f2231;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      margin: 0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(166, 25, 46, 0.05), transparent 22%),
-        radial-gradient(circle at top right, rgba(166, 25, 46, 0.04), transparent 18%),
-        var(--bg);
-      color: var(--text);
-      padding: 40px 20px 60px;
-    }
-
-    .container {
-      max-width: 1120px;
-      margin: 0 auto;
-    }
-
-    .hero {
-      margin-bottom: 28px;
-      padding: 28px;
-      background: linear-gradient(135deg, #fffdf9, #fff8f3);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-    }
-
-    .hero h1 {
-      margin: 0 0 10px;
-      font-size: 2rem;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
-    }
-
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.98rem;
-      line-height: 1.6;
-      max-width: 760px;
-    }
-
-    .question,
-    .rule-summary-card {
-      margin-bottom: 22px;
-      padding: 22px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .question:hover,
-    .rule-summary-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.06);
-    }
-
-    .question.correct,
-    .rule-summary-card.correct {
-      border-color: var(--correct-border);
-      background: linear-gradient(180deg, #ffffff, var(--correct-bg));
-    }
-
-    .question.incorrect,
-    .rule-summary-card.incorrect {
-      border-color: var(--incorrect-border);
-      background: linear-gradient(180deg, #ffffff, var(--incorrect-bg));
-    }
-
-    .question-header,
-    .rule-summary-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .question h3,
-    .rule-summary-title {
-      margin: 0;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--accent);
-      letter-spacing: -0.02em;
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 96px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      border: 1px solid var(--incorrect-border);
-      background: var(--incorrect-soft);
-      color: var(--incorrect-text);
-      white-space: nowrap;
-    }
-
-    .status-pill.correct {
-      border-color: var(--correct-border);
-      background: var(--correct-soft);
-      color: var(--correct-text);
-    }
-
-    .status-pill.incorrect {
-      border-color: var(--incorrect-border);
-      background: var(--incorrect-soft);
-      color: var(--incorrect-text);
-    }
-
-    .input-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-    }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    input {
-      width: 100%;
-      padding: 12px 14px;
-      font-size: 14px;
-      color: var(--text);
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    }
-
-    input::placeholder {
-      color: #a49d95;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(166, 25, 46, 0.12);
-      background: #ffffff;
-    }
-
-    .combined {
-      margin-top: 12px;
-      padding: 14px 15px;
-      border-radius: 12px;
-      word-break: break-word;
-      background: #fcfaf7;
-      border: 1px dashed #ddd3c8;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 13px;
-      color: #4f4a44;
-      white-space: pre-wrap;
-    }
-
-    .feedback {
-      margin-top: 12px;
-      padding: 16px;
-      border-radius: 14px;
-      background: linear-gradient(180deg, #fff5f6, #fbe5e8);
-      border: 1px solid #efc4cc;
-      font-size: 13px;
-      color: #5b1b25;
-    }
-
-    .feedback-summary {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(180px, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .stat-card {
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(166, 25, 46, 0.12);
-      border-radius: 12px;
-      padding: 12px;
-    }
-
-    .stat-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-
-    .stat-value {
-      font-size: 1rem;
-      font-weight: 800;
-      color: var(--accent);
-      word-break: break-word;
-    }
-
-    .toggle-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 6px;
-    }
-
-    .toggle-btn {
-      appearance: none;
-      border: 1px solid #ddb9c1;
-      background: #fff9fa;
-      color: var(--accent);
-      border-radius: 10px;
-      padding: 9px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
-    }
-
-    .toggle-btn:hover {
-      background: #fff1f3;
-      transform: translateY(-1px);
-    }
-
-    .toggle-btn.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    .toggle-panel {
-      display: none;
-      margin-top: 12px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid #efc4cc;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .toggle-panel.visible {
-      display: block;
-    }
-
-    .toggle-panel-header {
-      padding: 12px 14px;
-      border-bottom: 1px solid #f1d9de;
-      font-weight: 800;
-      color: var(--accent);
-      background: #fff7f8;
-    }
-
-    .toggle-panel-body {
-      max-height: 320px;
-      overflow: auto;
-      padding: 0;
-    }
-
-    .acl-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .acl-list li {
-      padding: 10px 14px;
-      border-bottom: 1px solid #f4e3e6;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      line-height: 1.45;
-      color: #4b2430;
-      word-break: break-word;
-      background: rgba(255, 255, 255, 0.45);
-    }
-
-    .acl-list li:last-child,
-    .rule-summary-item:last-child {
-      border-bottom: none;
-    }
-
-    .empty-list {
-      padding: 14px;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    .feedback-raw {
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      color: #6b3b44;
-      padding: 14px;
-      margin: 0;
-    }
-
-    .student-rules-section {
-      margin-top: 28px;
-    }
-
-    .student-rules-grid {
-      display: grid;
-      gap: 14px;
-    }
-
-    .rule-summary-item {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .rule-summary-left {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .rule-summary-rule-label {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .rule-summary-rule-text {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.55;
-      color: #403a35;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .rule-pair {
-      display: grid;
-      gap: 12px;
-    }
-
-    .rule-block {
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: #fcfaf7;
-    }
-
-    .rule-block-label {
-      display: block;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-
-    .debug-wrap {
-      margin-top: 20px;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 28px;
-    }
-
-    button {
-      appearance: none;
-      border: none;
-      border-radius: 12px;
-      padding: 13px 18px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
-    button:active {
-      transform: translateY(0);
-    }
-
-    .primary-btn {
-      background: var(--accent);
-      color: white;
-      box-shadow: 0 10px 24px rgba(166, 25, 46, 0.2);
-    }
-
-    .primary-btn:hover {
-      background: var(--accent-dark);
-    }
-
-    .secondary-btn {
-      background: #fffaf7;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .secondary-btn:hover {
-      background: #f5efe8;
-    }
-
-    .status,
-    .debug {
-      margin-top: 12px;
-      padding: 16px;
-      border-radius: 14px;
-      white-space: pre-wrap;
-      box-shadow: var(--shadow);
-    }
-
-    .status {
-      background: var(--success-bg);
-      border: 1px solid var(--border);
-      color: #3f3a35;
-      font-weight: 600;
-    }
-
-    .debug {
-      background: var(--debug-bg);
-      color: var(--debug-text);
-      border: 1px solid #282828;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      overflow-x: auto;
-    }
-
-    @media (max-width: 980px) {
-      .input-row,
-      .feedback-summary {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 640px) {
-      body {
-        padding: 22px 14px 40px;
-      }
-
-      .hero {
-        padding: 22px;
-        border-radius: 18px;
-      }
-
-      .hero h1 {
-        font-size: 1.65rem;
-      }
-
-      .question,
-      .rule-summary-card {
-        padding: 18px;
-      }
-
-      .question-header,
-      .rule-summary-header,
-      .rule-summary-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .input-row,
-      .feedback-summary {
-        grid-template-columns: 1fr;
-      }
-
-      .actions {
-        flex-direction: column;
-      }
-
-      button,
-      .toggle-btn {
-        width: 100%;
-      }
-
-      .toggle-actions {
-        flex-direction: column;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <section class="hero">
-      <h1>ABAC Input Form</h1>
-      <p>Enter each condition clearly and send all six questions to the API in one request.</p>
-    </section>
-
-    <div class="question incorrect" id="questionCard1">
-      <div class="question-header">
-        <h3>Question 1</h3>
-        <span class="status-pill incorrect" id="questionStatus1">Incorrect</span>
-      </div>
-      <div class="input-row">
-        <div class="input-group">
-          <label for="q1a">subject_condition</label>
-          <input id="q1a" placeholder="Enter subject condition" oninput="updateAnswer(1)" />
-        </div>
-        <div class="input-group">
-          <label for="q1b">resource_condition</label>
-          <input id="q1b" placeholder="Enter resource condition" oninput="updateAnswer(1)" />
-        </div>
-        <div class="input-group">
-          <label for="q1c">constraint</label>
-          <input id="q1c" placeholder="Enter constraint" oninput="updateAnswer(1)" />
-        </div>
-        <div class="input-group">
-          <label for="q1d">actions</label>
-          <input id="q1d" placeholder="Enter action(s)" oninput="updateAnswer(1)" />
-        </div>
-      </div>
-      <div class="combined" id="answer1">rule(; ; ; )</div>
-      <div class="feedback" id="feedback1">Feedback: </div>
-    </div>
-
-    <div class="question incorrect" id="questionCard2">
-      <div class="question-header">
-        <h3>Question 2:A doctor can modify an HR for a patient treated by one of the teams of which the doctor is a member. </h3>
-        <span class="status-pill incorrect" id="questionStatus2">Incorrect</span>
-      </div>
-      <div class="input-row">
-        <div class="input-group">
-          <label for="q2a">subject_condition</label>
-          <input id="q2a" placeholder="Enter subject condition" oninput="updateAnswer(2)" />
-        </div>
-        <div class="input-group">
-          <label for="q2b">resource_condition</label>
-          <input id="q2b" placeholder="Enter resource condition" oninput="updateAnswer(2)" />
-        </div>
-        <div class="input-group">
-          <label for="q2c">constraint</label>
-          <input id="q2c" placeholder="Enter constraint" oninput="updateAnswer(2)" />
-        </div>
-        <div class="input-group">
-          <label for="q2d">actions</label>
-          <input id="q2d" placeholder="Enter action(s)" oninput="updateAnswer(2)" />
-        </div>
-      </div>
-      <div class="combined" id="answer2">rule(; ; ; )</div>
-      <div class="feedback" id="feedback2">Feedback: </div>
-    </div>
-
-    <div class="question incorrect" id="questionCard3">
-      <div class="question-header">
-        <h3>Question 3A patient can modify their own HR.</h3>
-        <span class="status-pill incorrect" id="questionStatus3">Incorrect</span>
-      </div>
-      <div class="input-row">
-        <div class="input-group">
-          <label for="q3a">subject_condition</label>
-          <input id="q3a" placeholder="Enter subject condition" oninput="updateAnswer(3)" />
-        </div>
-        <div class="input-group">
-          <label for="q3b">resource_condition</label>
-          <input id="q3b" placeholder="Enter resource condition" oninput="updateAnswer(3)" />
-        </div>
-        <div class="input-group">
-          <label for="q3c">constraint</label>
-          <input id="q3c" placeholder="Enter constraint" oninput="updateAnswer(3)" />
-        </div>
-        <div class="input-group">
-          <label for="q3d">actions</label>
-          <input id="q3d" placeholder="Enter action(s)" oninput="updateAnswer(3)" />
-        </div>
-      </div>
-      <div class="combined" id="answer3">rule(; ; ; )</div>
-      <div class="feedback" id="feedback3">Feedback: </div>
-    </div>
-
-    <div class="question incorrect" id="questionCard4">
-      <div class="question-header">
-        <h3>Question 4</h3>
-        <span class="status-pill incorrect" id="questionStatus4">Incorrect</span>
-      </div>
-      <div class="input-row">
-        <div class="input-group">
-          <label for="q4a">subject_condition</label>
-          <input id="q4a" placeholder="Enter subject condition" oninput="updateAnswer(4)" />
-        </div>
-        <div class="input-group">
-          <label for="q4b">resource_condition</label>
-          <input id="q4b" placeholder="Enter resource condition" oninput="updateAnswer(4)" />
-        </div>
-        <div class="input-group">
-          <label for="q4c">constraint</label>
-          <input id="q4c" placeholder="Enter constraint" oninput="updateAnswer(4)" />
-        </div>
-        <div class="input-group">
-          <label for="q4d">actions</label>
-          <input id="q4d" placeholder="Enter action(s)" oninput="updateAnswer(4)" />
-        </div>
-      </div>
-      <div class="combined" id="answer4">rule(; ; ; )</div>
-      <div class="feedback" id="feedback4">Feedback: </div>
-    </div>
-
-    <div class="question incorrect" id="questionCard5">
-      <div class="question-header">
-        <h3>Question 5</h3>
-        <span class="status-pill incorrect" id="questionStatus5">Incorrect</span>
-      </div>
-      <div class="input-row">
-        <div class="input-group">
-          <label for="q5a">subject_condition</label>
-          <input id="q5a" placeholder="Enter subject condition" oninput="updateAnswer(5)" />
-        </div>
-        <div class="input-group">
-          <label for="q5b">resource_condition</label>
-          <input id="q5b" placeholder="Enter resource condition" oninput="updateAnswer(5)" />
-        </div>
-        <div class="input-group">
-          <label for="q5c">constraint</label>
-          <input id="q5c" placeholder="Enter constraint" oninput="updateAnswer(5)" />
-        </div>
-        <div class="input-group">
-          <label for="q5d">actions</label>
-          <input id="q5d" placeholder="Enter action(s)" oninput="updateAnswer(5)" />
-        </div>
-      </div>
-      <div class="combined" id="answer5">rule(; ; ; )</div>
-      <div class="feedback" id="feedback5">Feedback: </div>
-    </div>
-
-    <div class="question incorrect" id="questionCard6">
-      <div class="question-header">
-        <h3>Question 6</h3>
-        <span class="status-pill incorrect" id="questionStatus6">Incorrect</span>
-      </div>
-      <div class="input-row">
-        <div class="input-group">
-          <label for="q6a">subject_condition</label>
-          <input id="q6a" placeholder="Enter subject condition" oninput="updateAnswer(6)" />
-        </div>
-        <div class="input-group">
-          <label for="q6b">resource_condition</label>
-          <input id="q6b" placeholder="Enter resource condition" oninput="updateAnswer(6)" />
-        </div>
-        <div class="input-group">
-          <label for="q6c">constraint</label>
-          <input id="q6c" placeholder="Enter constraint" oninput="updateAnswer(6)" />
-        </div>
-        <div class="input-group">
-          <label for="q6d">actions</label>
-          <input id="q6d" placeholder="Enter action(s)" oninput="updateAnswer(6)" />
-        </div>
-      </div>
-      <div class="combined" id="answer6">rule(; ; ; )</div>
-      <div class="feedback" id="feedback6">Feedback: </div>
-    </div>
-
-    <div class="actions">
-      <button type="button" class="primary-btn" onclick="sendToApi()">Send to API</button>
-      <button type="button" class="secondary-btn" onclick="clearSavedInputs()">Clear Saved Inputs</button>
-    </div>
-
-    <div class="status" id="status">Ready</div>
-
-    <div class="debug-wrap">
-      <div class="toggle-actions">
-        <button type="button" class="toggle-btn" id="btn-debug-request" onclick="toggleDebugPanel('debug-request')">
-          Show JSON being sent
-        </button>
-        <button type="button" class="toggle-btn" id="btn-debug-response" onclick="toggleDebugPanel('debug-response')">
-          Show JSON received
-        </button>
-      </div>
-
-      <div class="toggle-panel" id="panel-debug-request">
-        <div class="toggle-panel-header">JSON being sent</div>
-        <div class="toggle-panel-body">
-          <div class="debug" id="debugRequest">JSON being sent will appear here...</div>
-        </div>
-      </div>
-
-      <div class="toggle-panel" id="panel-debug-response">
-        <div class="toggle-panel-header">JSON received from server</div>
-        <div class="toggle-panel-body">
-          <div class="debug" id="debugResponse">JSON received from server will appear here...</div>
-        </div>
-      </div>
-    </div>
-
-    <section class="student-rules-section">
-      <div class="rule-summary-card incorrect" id="allRulesCard">
-        <div class="rule-summary-header">
-          <div class="rule-summary-title">All Student Rules</div>
-        </div>
-        <div class="student-rules-grid" id="allRules"></div>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    const API_IP = "100.94.167.31";
-    // const API_IP = "100.102.195.78";
-    const API_PORT = "4989";
-    const API_PROTOCOL = "http";
-    const API_PATH = "/feedback";
-
-    const STORAGE_KEY = "abac_form_data_v1";
-    const FEEDBACK_PLACEHOLDER = "Feedback: ";
-    const QUESTION_COUNT = 6;
-
-    function buildApiUrl() {
-      return `${API_PROTOCOL}://${API_IP}:${API_PORT}${API_PATH}`;
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#39;");
-    }
-
-    function getQuestionData(q) {
-      return {
-        question_number: q,
-        subject_condition: document.getElementById(`q${q}a`).value.trim(),
-        resource_condition: document.getElementById(`q${q}b`).value.trim(),
-        constraint: document.getElementById(`q${q}c`).value.trim(),
-        actions: document.getElementById(`q${q}d`).value.trim()
-      };
-    }
-
-    function buildRuleStringFromData(data) {
-      return `rule(${data.subject_condition}; ${data.resource_condition}; ${data.constraint}; ${data.actions})`;
-    }
-
-    function buildPayload() {
-      return {
-        questions: Array.from({ length: QUESTION_COUNT }, (_, i) => getQuestionData(i + 1))
-      };
-    }
-
-    function saveFormData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPayload()));
-    }
-
-    function loadFormData() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) return;
-
-      try {
-        const parsed = JSON.parse(saved);
-        if (!parsed.questions || !Array.isArray(parsed.questions)) return;
-
-        parsed.questions.forEach(q => {
-          document.getElementById(`q${q.question_number}a`).value = q.subject_condition || "";
-          document.getElementById(`q${q.question_number}b`).value = q.resource_condition || "";
-          document.getElementById(`q${q.question_number}c`).value = q.constraint || "";
-          document.getElementById(`q${q.question_number}d`).value = q.actions || "";
-        });
-      } catch (err) {
-        console.error("Failed to load saved form data", err);
-      }
-    }
-
-    function isPerfectScore(value) {
-      if (value === 1 || value === 1.0) return true;
-      const numeric = Number(value);
-      return Number.isFinite(numeric) && numeric === 1;
-    }
-
-    function setQuestionState(questionNumber, isCorrect) {
-      const card = document.getElementById(`questionCard${questionNumber}`);
-      const pill = document.getElementById(`questionStatus${questionNumber}`);
-
-      if (!card || !pill) return;
-
-      card.classList.remove("correct", "incorrect");
-      pill.classList.remove("correct", "incorrect");
-
-      if (isCorrect) {
-        card.classList.add("correct");
-        pill.classList.add("correct");
-        pill.textContent = "Correct";
-      } else {
-        card.classList.add("incorrect");
-        pill.classList.add("incorrect");
-        pill.textContent = "Incorrect";
-      }
-    }
-
-    function resetQuestionStates() {
-      for (let i = 1; i <= QUESTION_COUNT; i++) {
-        setQuestionState(i, false);
-      }
-    }
-
-    function updateAnswer(q) {
-      const data = getQuestionData(q);
-      document.getElementById(`answer${q}`).textContent = buildRuleStringFromData(data);
-      saveFormData();
-      updateAllRules(window.lastApiData || null);
-    }
-
-    function tryExtractJson(text) {
-      if (typeof text !== "string") return null;
-
-      const trimmed = text.trim();
-
-      try {
-        return JSON.parse(trimmed);
-      } catch (_) {}
-
-      const firstBrace = trimmed.indexOf("{");
-      const lastBrace = trimmed.lastIndexOf("}");
-
-      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-        const candidate = trimmed.slice(firstBrace, lastBrace + 1);
-        try {
-          return JSON.parse(candidate);
-        } catch (_) {}
-      }
-
-      return null;
-    }
-
-    function normalizeArray(value) {
-      return Array.isArray(value) ? value : [];
-    }
-
-    function getBackendRuleText(value) {
-      if (!value || typeof value !== "object") return "";
-
-      if (typeof value.rule_string === "string") return value.rule_string;
-      if (typeof value.generated_rule === "string") return value.generated_rule;
-      if (typeof value.backend_rule === "string") return value.backend_rule;
-
-      if (value.rule && typeof value.rule === "object" && typeof value.rule.rule_string === "string") {
-        return value.rule.rule_string;
-      }
-
-      if (typeof value.rule === "string") return value.rule;
-
-      return "";
-    }
-
-    function getResultMap(apiData) {
-      const resultsMap = new Map();
-
-      if (apiData && Array.isArray(apiData.results)) {
-        apiData.results.forEach(item => {
-          resultsMap.set(item.question_number, item);
-        });
-      }
-
-      if (apiData && Array.isArray(apiData.tested_questions)) {
-        apiData.tested_questions.forEach(item => {
-          if (!resultsMap.has(item.question_number)) {
-            resultsMap.set(item.question_number, item);
-          } else {
-            const existing = resultsMap.get(item.question_number);
-            resultsMap.set(item.question_number, { ...item, ...existing });
-          }
-        });
-      }
-
-      return resultsMap;
-    }
-
-    function getFeedbackParsed(resultItem) {
-      if (!resultItem) return null;
-      return tryExtractJson(resultItem.feedback_message);
-    }
-
-    function updateAllRules(apiData = null) {
-      const allRulesBox = document.getElementById("allRules");
-      const card = document.getElementById("allRulesCard");
-      if (!allRulesBox || !card) return;
-
-      const resultsMap = getResultMap(apiData);
-      const items = [];
-      let anyCorrect = false;
-
-      for (let i = 1; i <= QUESTION_COUNT; i++) {
-        const data = getQuestionData(i);
-        const studentRuleText = buildRuleStringFromData(data);
-
-        let backendRuleText = "";
-        let isCorrect = false;
-
-        const resultItem = resultsMap.get(i);
-        if (resultItem) {
-          const parsedFeedback = getFeedbackParsed(resultItem);
-
-          backendRuleText =
-            getBackendRuleText(resultItem) ||
-            getBackendRuleText(resultItem.rule) ||
-            getBackendRuleText(parsedFeedback);
-
-          if (parsedFeedback && isPerfectScore(parsedFeedback.acl_jacc_val)) {
-            isCorrect = true;
-            anyCorrect = true;
-          }
-        }
-
-        items.push(`
-          <div class="rule-summary-item ${isCorrect ? "correct" : "incorrect"}">
-            <div class="rule-summary-left">
-              <span class="rule-summary-rule-label">Question ${i}</span>
-              <div class="rule-pair">
-                <div class="rule-block">
-                  <span class="rule-block-label">rule(student input)</span>
-                  <div class="rule-summary-rule-text">${escapeHtml(studentRuleText)}</div>
-                </div>
-                <div class="rule-block">
-                  <span class="rule-block-label">rule(backend generated)</span>
-                  <div class="rule-summary-rule-text">${escapeHtml(backendRuleText || "No backend rule returned")}</div>
-                </div>
-              </div>
-            </div>
-            <span class="status-pill ${isCorrect ? "correct" : "incorrect"}">
-              ${isCorrect ? "Correct" : "Incorrect"}
-            </span>
-          </div>
-        `);
-      }
-
-      allRulesBox.innerHTML = items.join("");
-      card.classList.remove("correct", "incorrect");
-      card.classList.add(anyCorrect ? "correct" : "incorrect");
-    }
-
-    function buildSummaryMarkup(parsed) {
-      return `
-        <div class="feedback-summary">
-          <div class="stat-card">
-            <span class="stat-label">acl_jacc_val</span>
-            <span class="stat-value">${escapeHtml(parsed.acl_jacc_val ?? "N/A")}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">correct_acl_count</span>
-            <span class="stat-value">${escapeHtml(parsed.correct_acl_count ?? "N/A")}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">student_acl_count</span>
-            <span class="stat-value">${escapeHtml(parsed.student_acl_count ?? "N/A")}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">intersection_count</span>
-            <span class="stat-value">${escapeHtml(parsed.intersection_count ?? "N/A")}</span>
-          </div>
-        </div>
-      `;
-    }
-
-    function buildToggleButtons(questionNumber, parsed) {
-      const sections = [
-        { key: "correct_acl", label: `correct_acl (${normalizeArray(parsed.correct_acl).length})` },
-        { key: "student_acl", label: `student_acl (${normalizeArray(parsed.student_acl).length})` },
-        { key: "over_per", label: `over_per (${parsed.over_per_count ?? normalizeArray(parsed.over_per).length})` },
-        { key: "under_per", label: `under_per (${parsed.under_per_count ?? normalizeArray(parsed.under_per).length})` },
-        { key: "raw_feedback", label: "raw_feedback" }
-      ];
-
-      return `
-        <div class="toggle-actions">
-          ${sections.map(section => `
-            <button
-              type="button"
-              class="toggle-btn"
-              id="btn-${questionNumber}-${section.key}"
-              onclick="toggleSection(${questionNumber}, '${section.key}')"
-            >
-              Show ${escapeHtml(section.label)}
-            </button>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    function buildListMarkup(items) {
-      if (!items.length) {
-        return `<div class="empty-list">No entries.</div>`;
-      }
-
-      return `
-        <ul class="acl-list">
-          ${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
-        </ul>
-      `;
-    }
-
-    function buildPanelMarkup(questionNumber, key, title, items) {
-      return `
-        <div class="toggle-panel" id="panel-${questionNumber}-${key}">
-          <div class="toggle-panel-header">${escapeHtml(title)}</div>
-          <div class="toggle-panel-body">
-            ${buildListMarkup(items)}
-          </div>
-        </div>
-      `;
-    }
-
-    function buildRawPanelMarkup(questionNumber, rawText) {
-      return `
-        <div class="toggle-panel" id="panel-${questionNumber}-raw_feedback">
-          <div class="toggle-panel-header">raw_feedback</div>
-          <div class="toggle-panel-body">
-            <pre class="feedback-raw">${escapeHtml(rawText)}</pre>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderParsedFeedback(questionNumber, parsed, rawText) {
-      const feedbackBox = document.getElementById(`feedback${questionNumber}`);
-      if (!feedbackBox) return;
-
-      feedbackBox.innerHTML = `
-        ${buildSummaryMarkup(parsed)}
-        ${buildToggleButtons(questionNumber, parsed)}
-        ${buildPanelMarkup(questionNumber, "correct_acl", "correct_acl", normalizeArray(parsed.correct_acl))}
-        ${buildPanelMarkup(questionNumber, "student_acl", "student_acl", normalizeArray(parsed.student_acl))}
-        ${buildPanelMarkup(questionNumber, "over_per", "over_per", normalizeArray(parsed.over_per))}
-        ${buildPanelMarkup(questionNumber, "under_per", "under_per", normalizeArray(parsed.under_per))}
-        ${buildRawPanelMarkup(questionNumber, rawText)}
-      `;
-    }
-
-    function renderPlainFeedback(questionNumber, text) {
-      const feedbackBox = document.getElementById(`feedback${questionNumber}`);
-      if (!feedbackBox) return;
-
-      feedbackBox.innerHTML = `
-        <div>${escapeHtml(text)}</div>
-        <div class="toggle-actions">
-          <button
-            type="button"
-            class="toggle-btn"
-            id="btn-${questionNumber}-raw_feedback"
-            onclick="toggleSection(${questionNumber}, 'raw_feedback')"
-          >
-            Show raw_feedback
-          </button>
-        </div>
-        ${buildRawPanelMarkup(questionNumber, text)}
-      `;
-    }
-
-    function renderFeedback(apiData) {
-      if (!apiData || !Array.isArray(apiData.results)) return;
-
-      apiData.results.forEach(item => {
-        const parsed = tryExtractJson(item.feedback_message);
-
-        if (parsed && typeof parsed === "object") {
-          renderParsedFeedback(item.question_number, parsed, item.feedback_message);
-          setQuestionState(item.question_number, isPerfectScore(parsed.acl_jacc_val));
-        } else {
-          renderPlainFeedback(item.question_number, item.feedback_message || "No feedback returned.");
-          setQuestionState(item.question_number, false);
-        }
-      });
-
-      updateAllRules(apiData);
-    }
-
-    function toggleSection(questionNumber, key) {
-      const panel = document.getElementById(`panel-${questionNumber}-${key}`);
-      const button = document.getElementById(`btn-${questionNumber}-${key}`);
-
-      if (!panel || !button) return;
-
-      const isVisible = panel.classList.contains("visible");
-
-      if (isVisible) {
-        panel.classList.remove("visible");
-        button.classList.remove("active");
-        button.textContent = button.textContent.replace(/^Hide /, "Show ");
-      } else {
-        panel.classList.add("visible");
-        button.classList.add("active");
-        button.textContent = button.textContent.replace(/^Show /, "Hide ");
-      }
-    }
-
-    function toggleDebugPanel(key) {
-      const panel = document.getElementById(`panel-${key}`);
-      const button = document.getElementById(`btn-${key}`);
-
-      if (!panel || !button) return;
-
-      const isVisible = panel.classList.contains("visible");
-
-      if (isVisible) {
-        panel.classList.remove("visible");
-        button.classList.remove("active");
-        button.textContent = button.textContent.replace(/^Hide /, "Show ");
-      } else {
-        panel.classList.add("visible");
-        button.classList.add("active");
-        button.textContent = button.textContent.replace(/^Show /, "Hide ");
-      }
-    }
-
-    function resetFeedbackBox(questionNumber) {
-      const feedbackBox = document.getElementById(`feedback${questionNumber}`);
-      if (feedbackBox) {
-        feedbackBox.textContent = FEEDBACK_PLACEHOLDER;
-      }
-    }
-
-    function clearFeedback() {
-      for (let i = 1; i <= QUESTION_COUNT; i++) {
-        resetFeedbackBox(i);
-      }
-    }
-
-    function clearSavedInputs() {
-      localStorage.removeItem(STORAGE_KEY);
-      window.lastApiData = null;
-
-      for (let i = 1; i <= QUESTION_COUNT; i++) {
-        document.getElementById(`q${i}a`).value = "";
-        document.getElementById(`q${i}b`).value = "";
-        document.getElementById(`q${i}c`).value = "";
-        document.getElementById(`q${i}d`).value = "";
-        document.getElementById(`answer${i}`).textContent = "rule(; ; ; )";
-        resetFeedbackBox(i);
-      }
-
-      resetQuestionStates();
-      updateAllRules();
-
-      document.getElementById("debugRequest").textContent = "JSON being sent will appear here...";
-      document.getElementById("debugResponse").textContent = "JSON received from server will appear here...";
-      document.getElementById("status").textContent = "Saved inputs cleared.";
-    }
-
-    async function sendToApi() {
-      const statusBox = document.getElementById("status");
-      const requestBox = document.getElementById("debugRequest");
-      const responseBox = document.getElementById("debugResponse");
-      const payload = buildPayload();
-      const apiUrl = buildApiUrl();
-
-      requestBox.textContent = JSON.stringify(payload, null, 2);
-      clearFeedback();
-      resetQuestionStates();
-      updateAllRules();
-
-      statusBox.textContent = `Sending to ${apiUrl} ...`;
-      responseBox.textContent = "Waiting for server response...";
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        });
-
-        const rawText = await response.text();
-        responseBox.textContent = rawText;
-
-        if (!response.ok) {
-          statusBox.textContent = `Status: ${response.status} ${response.statusText}`;
-          return;
-        }
-
-        let data;
-        try {
-          data = JSON.parse(rawText);
-        } catch (_) {
-          statusBox.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse was not valid JSON.`;
-          return;
-        }
-
-        window.lastApiData = data;
-        renderFeedback(data);
-        statusBox.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse received and feedback updated on page.`;
-      } catch (error) {
-        statusBox.textContent = `Request failed:\n${error}`;
-        responseBox.textContent = String(error);
-      }
-    }
-
-    window.lastApiData = null;
-
-    loadFormData();
-
-    for (let i = 1; i <= QUESTION_COUNT; i++) {
-      updateAnswer(i);
-      resetFeedbackBox(i);
-    }
-
-    resetQuestionStates();
-    updateAllRules();
-  </script>
-</body>
-</html> -->
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1277,8 +16,6 @@
       --accent-dark: #861324;
       --accent-soft: #f7d9de;
       --success-bg: #f5f1eb;
-      --debug-bg: #161616;
-      --debug-text: #d7ffe8;
       --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
       --radius: 16px;
 
@@ -1314,6 +51,7 @@
         var(--bg);
       color: var(--text);
       padding: 40px 20px 60px;
+      overflow-x: hidden;
     }
 
     .container {
@@ -1377,10 +115,17 @@
     .question-header,
     .rule-summary-header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 16px;
+    }
+
+    .question-header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .question h3,
@@ -1419,6 +164,20 @@
       border-color: var(--incorrect-border);
       background: var(--incorrect-soft);
       color: var(--incorrect-text);
+    }
+
+    .mini-check-btn {
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(166, 25, 46, 0.16);
+    }
+
+    .mini-check-btn:hover {
+      background: var(--accent-dark);
     }
 
     .input-row {
@@ -1546,6 +305,11 @@
       background: var(--accent);
       color: #fff;
       border-color: var(--accent);
+    }
+
+    .toggle-btn.correct-btn.active,
+    .toggle-btn.correct-btn {
+      position: relative;
     }
 
     .toggle-panel {
@@ -1603,16 +367,6 @@
       font-style: italic;
     }
 
-    .feedback-raw {
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      color: #6b3b44;
-      padding: 14px;
-      margin: 0;
-    }
-
     .student-rules-section {
       margin-top: 28px;
     }
@@ -1629,6 +383,14 @@
       gap: 14px;
       padding: 16px;
       border-bottom: 1px solid var(--border);
+    }
+
+    .rule-summary-item.correct {
+      background: linear-gradient(180deg, #ffffff, var(--correct-bg));
+    }
+
+    .rule-summary-item.incorrect {
+      background: linear-gradient(180deg, #ffffff, var(--incorrect-bg));
     }
 
     .rule-summary-left {
@@ -1774,10 +536,6 @@
       font-family: inherit;
     }
 
-    .debug-wrap {
-      margin-top: 20px;
-    }
-
     .actions {
       display: flex;
       flex-wrap: wrap;
@@ -1824,29 +582,16 @@
       background: #f5efe8;
     }
 
-    .status,
-    .debug {
+    .status {
       margin-top: 12px;
       padding: 16px;
       border-radius: 14px;
       white-space: pre-wrap;
       box-shadow: var(--shadow);
-    }
-
-    .status {
       background: var(--success-bg);
       border: 1px solid var(--border);
       color: #3f3a35;
       font-weight: 600;
-    }
-
-    .debug {
-      background: var(--debug-bg);
-      color: var(--debug-text);
-      border: 1px solid #282828;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12px;
-      overflow-x: auto;
     }
 
     @media (max-width: 980px) {
@@ -1884,6 +629,10 @@
         align-items: flex-start;
       }
 
+      .question-header-right {
+        width: 100%;
+      }
+
       .input-row,
       .feedback-summary {
         grid-template-columns: 1fr;
@@ -1894,7 +643,8 @@
       }
 
       button,
-      .toggle-btn {
+      .toggle-btn,
+      .mini-check-btn {
         width: 100%;
       }
 
@@ -1907,14 +657,256 @@
 <body>
   <div class="container">
     <section class="hero">
-      <h1>ABAC Input Form</h1>
-      <p>Enter each condition clearly and send all six questions to the API in one request.</p>
+      <h1>Activity 5 - ABAC Policy Problems</h1>
+      <h3>CSUMB CST-315</h3>
+    </section>
+
+    <section class="question" style="background:#fffdf9; border-style:dashed; overflow-x:auto;">
+      <div class="question-header">
+        <h3>Policy Description: Healthcare</h3>
+      </div>
+
+      <table style="width:100%; border-collapse:collapse; font-size:13px;">
+        <tr><td colspan="4" style="padding:10px; font-weight:700;"># Policy Description: Healthcare</td></tr>
+        <tr><td colspan="4" style="padding:10px;">*Vesion: v20250308*</td></tr>
+
+        <tr><td colspan="4" style="padding:10px;">
+This is a sample policy developed by Xu et al. (2015). The policy manages access to electronic health records (HRs) and individual HR items (entries within health records). It defines access rules for nurses, doctors, patients, and authorized agents (such as a patient’s spouse).
+        </td></tr>
+
+        <tr><td colspan="4" style="padding:10px;">
+<strong>Reference</strong>: Zhongyuan Xu and Scott D. Stoller. Mining attribute-based access control policies. IEEE Transactions on Dependable and Secure Computing, 12(5):533–545, September–October 2015.
+        </td></tr>
+
+        <tr><td colspan="4" style="padding:10px; font-weight:700;">Subject/User Attributes</td></tr>
+        <tr style="background:#f5efe8; font-weight:700;">
+          <td>Attribute Name</td><td>Multiplicity, Type</td><td>Description</td><td>Example Values</td>
+        </tr>
+        <tr><td>uid</td><td>Single, String</td><td>User’s unique identifier.</td><td>carNurse1, oncDoc2, oncPat2</td></tr>
+        <tr><td>position</td><td>Single, String</td><td>The user's position.</td><td>doctor, nurse, patient, agent</td></tr>
+        <tr><td>specialties</td><td>Multi, Set&lt;String&gt;</td><td>The user’s areas of medical expertise (for doctors).</td><td>{cardiology, oncology}</td></tr>
+        <tr><td>teams</td><td>Multi, Set&lt;String&gt;</td><td>Medical teams of which the user is a member.</td><td>{oncTeam1, carTeam2}</td></tr>
+        <tr><td>ward</td><td>Single, String</td><td>The ward in which the user works.</td><td>oncWard, carWard</td></tr>
+        <tr><td>agentFor</td><td>Multi, Set&lt;String&gt;</td><td>The set of patients for which this user is an agent.</td><td>{oncPat2, carPat3}</td></tr>
+
+        <tr><td colspan="4" style="padding:10px; font-weight:700;">Resource Attributes</td></tr>
+        <tr style="background:#f5efe8; font-weight:700;">
+          <td>Attribute Name</td><td>Multiplicity, Type</td><td>Description</td><td>Example Values</td>
+        </tr>
+        <tr><td>rid</td><td>Single, String</td><td>Resource’s unique identifier</td><td>oncPat1HR</td></tr>
+        <tr><td>type</td><td>Single, String</td><td>Type of resource being accessed.</td><td>HR, HRitem</td></tr>
+        <tr><td>patient</td><td>Single, String</td><td>The patient associated with the HR.</td><td>oncPat1, carPat2</td></tr>
+        <tr><td>treatingTeam</td><td>Single, String</td><td>The team treating the patient.</td><td>oncTeam1</td></tr>
+        <tr><td>ward</td><td>Single, String</td><td>The ward of treatment.</td><td>oncWard</td></tr>
+        <tr><td>topics</td><td>Multi, Set&lt;String&gt;</td><td>Medical areas of the item.</td><td>{cardiology, oncology}</td></tr>
+        <tr><td>author</td><td>Single, String</td><td>ID of creator.</td><td>oncDoc1</td></tr>
+      </table>
+
+      <details style="margin-top:14px;">
+        <summary style="cursor:pointer; font-weight:700;">Show Full ABAC Policy Dataset</summary>
+        <pre style="white-space:pre-wrap; font-size:11px; margin-top:10px; background:#f8f6f2; padding:12px; border-radius:10px; border:1px solid #e8e1d8;">
+# ABAC policy for a healthcare facility, e.g., a hospital.
+
+# Note that the two words "user" and "subject" are used interchangeably in this document.
+
+# Please refer to the policy description document for the detailed descriptions subject attributes and resource attributes. Note that some attributes might be irrelevant for some users and resources.
+
+
+#------------------------------------------------------------
+# user attribute data
+#------------------------------------------------------------
+
+# nurses
+
+userAttrib(oncNurse1, position=nurse, ward=oncWard)
+userAttrib(oncNurse2, position=nurse, ward=oncWard)
+
+userAttrib(carNurse1, position=nurse, ward=carWard)
+userAttrib(carNurse2, position=nurse, ward=carWard)
+
+# doctors
+
+userAttrib(oncDoc1, position=doctor, specialties={oncology}, teams={oncTeam1 oncTeam2})
+userAttrib(oncDoc2, position=doctor, specialties={oncology}, teams={oncTeam1})
+userAttrib(oncDoc3, position=doctor, specialties={oncology}, teams={oncTeam2})
+userAttrib(oncDoc4, position=doctor, specialties={oncology}, teams={oncTeam2})
+
+userAttrib(carDoc1, position=doctor, specialties={cardiology}, teams={carTeam1})
+userAttrib(carDoc2, position=doctor, specialties={cardiology}, teams={carTeam2})
+
+userAttrib(anesDoc1, position=doctor, specialties={anesthesiology}, teams={oncTeam1 carTeam1})
+
+# the following doctors are not currently on any teams, but they have
+# access to HR items they authored when they were on a team.
+userAttrib(doc1, position=doctor, specialties={oncology pediatrics})
+userAttrib(doc2, position=doctor, specialties={cardiology neurology})
+
+# patients and agents
+
+userAttrib(oncPat1, position=patient, ward=oncWard)
+userAttrib(oncPat2, position=patient, ward=oncWard)
+
+userAttrib(carPat1, position=patient, ward=carWard)
+userAttrib(carPat2, position=patient, ward=carWard)
+
+userAttrib(oncAgent1, position=agent, agentFor={oncPat2})
+userAttrib(oncAgent2, position=agent, agentFor={oncPat2})
+userAttrib(carAgent1, position=agent, agentFor={carPat2})
+userAttrib(carAgent2, position=agent, agentFor={carPat2})
+
+#------------------------------------------------------------
+# resource attribute data
+#------------------------------------------------------------
+
+# resources for oncPat1
+resourceAttrib(oncPat1oncItem, type=HRitem, author=oncDoc1, patient=oncPat1, topics={oncology}, treatingTeam=oncTeam1, ward=oncWard)
+resourceAttrib(oncPat1nursingItem, type=HRitem, author=oncNurse2, patient=oncPat1, topics={nursing}, treatingTeam=oncTeam1, ward=oncWard)
+resourceAttrib(oncPat1noteItem, type=HRitem, author=oncPat1, patient=oncPat1, topics={note}, treatingTeam=oncTeam1, ward=oncWard)
+resourceAttrib(oncPat1HR, type=HR, patient=oncPat1, treatingTeam=oncTeam1, ward=oncWard)
+
+# resources for oncPat2
+resourceAttrib(oncPat2oncItem, type=HRitem, author=doc1, patient=oncPat2, topics={oncology}, treatingTeam=oncTeam2, ward=oncWard)
+resourceAttrib(oncPat2nursingItem, type=HRitem, author=oncNurse1, patient=oncPat2, topics={nursing}, treatingTeam=oncTeam2, ward=oncWard)
+resourceAttrib(oncPat2noteItem, type=HRitem, author=oncAgent1, patient=oncPat2, topics={note}, treatingTeam=oncTeam2, ward=oncWard)
+resourceAttrib(oncPat2HR, type=HR, patient=oncPat2, treatingTeam=oncTeam2, ward=oncWard)
+
+# resources for carPat1
+resourceAttrib(carPat1carItem, type=HRitem, author=carDoc2, patient=carPat1, topics={cardiology}, treatingTeam=carTeam1, ward=carWard)
+resourceAttrib(carPat1nursingItem, type=HRitem, author=carNurse1, patient=carPat1, topics={nursing}, treatingTeam=carTeam1, ward=carWard)
+resourceAttrib(carPat1noteItem, type=HRitem, author=carPat1, patient=carPat1, topics={note}, treatingTeam=carTeam1, ward=carWard)
+resourceAttrib(carPat1HR, type=HR, patient=carPat1, treatingTeam=carTeam1, ward=carWard)
+
+# resources for carPat2
+resourceAttrib(carPat2carItem, type=HRitem, author=doc2, patient=carPat2, topics={cardiology}, treatingTeam=carTeam2, ward=carWard)
+resourceAttrib(carPat2nursingItem, type=HRitem, author=carNurse2, patient=carPat2, topics={nursing}, treatingTeam=carTeam2, ward=carWard)
+resourceAttrib(carPat2noteItem, type=HRitem, author=carAgent1, patient=carPat2, topics={note}, treatingTeam=carTeam2, ward=carWard)
+resourceAttrib(carPat2HR, type=HR, patient=carPat2, treatingTeam=carTeam2, ward=carWard)
+        </pre>
+      </details>
+
+      <section class="question" style="background:#fffdf9; margin-top:14px;">
+        <div class="question-header">
+          <h3>.abac Files Description</h3>
+        </div>
+        <div style="font-size:13px; line-height:1.6; color:#403a35;">
+          <h4>Policy Structure</h4>
+          <pre style="background:#f8f6f2; padding:12px; border-radius:10px; border:1px solid #e8e1d8;">userAttrib(uid, attribute1=value1, attribute2=value2, ...)
+
+resourceAttrib(rid, attribute1=value1, attribute2=value2, ...)</pre>
+
+          <p>The <code>userAttrib</code> and <code>resourceAttrib</code> lines define the users (subjects) and resources in the policy, respectively.</p>
+
+          <ul>
+            <li>The first argument of a <code>userAttrib</code> is automatically assigned to an attribute named <code>uid</code>, which is the id of the user.</li>
+            <li>The first argument of a <code>resourceAttrib</code> is automatically assigned to an attribute named <code>rid</code>, which is the id of the resource.</li>
+            <li><code>value1</code>, <code>value2</code>, ... are atomic values or sets of atomic values.
+              <ul>
+                <li>An atomic value is a string that starts with a character other than a left curly brace.</li>
+                <li>A set has the form <code>{element1 element2 ...}</code>. Elements are separated by spaces, not commas.</li>
+              </ul>
+            </li>
+          </ul>
+
+          <p><code>userAttrib</code> and <code>resourceAttrib</code> statements must precede rule statements.</p>
+
+          <h4>Rule Format</h4>
+          <pre style="background:#f8f6f2; padding:12px; border-radius:10px; border:1px solid #e8e1d8;">rule(subCond; resCond; cons; acts)</pre>
+
+          <p>The <code>rule</code> lines define the rules of the policy.</p>
+
+          <ul>
+            <li><strong>subCond</strong>: conjunction of subject conditions
+              <ul>
+                <li><code>attr [ {value1 value2 ...}</code> → "in" operator</li>
+                <li><code>attr ] value</code> → "contains" operator</li>
+              </ul>
+            </li>
+
+            <li><strong>resCond</strong>: same syntax as subject condition</li>
+
+            <li><strong>acts</strong>: set of actions</li>
+
+            <li><strong>cons</strong>: conjunction of constraints
+
+          <h4>Constraint Operators and Meaning</h4>
+
+          <pre style="background:#f8f6f2; padding:10px; border-radius:8px; border:1px solid #e8e1d8;">aum > arm
+aus [ arm
+aum ] ars
+aus = ars</pre>
+
+          <p><strong>Where:</strong></p>
+          <ul>
+            <li><code>aus</code>: single-valued user attribute</li>
+            <li><code>aum</code>: multi-valued user attribute</li>
+            <li><code>ars</code>: single-valued resource attribute</li>
+            <li><code>arm</code>: multi-valued resource attribute</li>
+          </ul>
+
+          <h4>Operator Mapping</h4>
+          <ul>
+            <li><code>=</code> : equals → <strong>use =</strong></li>
+            <li><code>∈</code> : in → <strong>use [</strong></li>
+            <li><code>∋</code> : contains → <strong>use ]</strong></li>
+            <li><code>⊇</code> : supseteq → <strong>use ></strong></li>
+          </ul>
+
+          <p style="color:#a6192e; font-weight:700;">
+            For this assignment, and in order for computers to understand your rules, you must use the operators &gt;, [, ], and = instead of symbolic versions.
+          </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </section>
+
+    <section class="question" style="background:#fffdf9;">
+      <div class="question-header">
+        <h3>Instructions</h3>
+      </div>
+      <div style="font-size:13px; line-height:1.6; color:#403a35;">
+        Given the set of subject attributes and resource attributes in a sample policy of a healthcare facility, express the specified English rules in the ABAC policy language for the next six (6) questions:
+      </div>
+    </section>
+
+    <section class="question" style="background:#fffdf9; margin-top:14px;">
+      <div class="question-header">
+        <h3>How to Read Results</h3>
+      </div>
+
+      <div style="font-size:13px; line-height:1.6; color:#403a35;">
+        <h4>Metrics</h4>
+        <ul>
+          <li><strong>Jaccard Value</strong>: similarity score (intersection / union)
+            <br>1.0 = perfect, 0.0 = incorrect
+          </li>
+          <li><strong>Correct ACL Count</strong>: total correct permissions</li>
+          <li><strong>Student ACL Count</strong>: permissions your rule generated</li>
+          <li><strong>Intersection Count</strong>: permissions you got correct</li>
+        </ul>
+
+        <h4>Categories</h4>
+        <ul>
+          <li><strong>Correct ACL</strong>: ground truth permissions</li>
+          <li><strong>Student ACL</strong>: your generated permissions</li>
+          <li><strong>Over Permissions</strong>: extra permissions (too permissive)</li>
+          <li><strong>Under Permissions</strong>: missing permissions (too restrictive)</li>
+          <li><strong>Atomic Rules</strong>: shows exactly what part of your rule is wrong</li>
+        </ul>
+
+        <p style="color:#a6192e; font-weight:700;">
+          Goal: maximize Jaccard Value and eliminate over/under permissions.
+        </p>
+      </div>
     </section>
 
     <div class="question incorrect" id="questionCard1">
       <div class="question-header">
         <h3>Question 1: A nurse can modify an HR for a patient in the ward where the nurse works.</h3>
-        <span class="status-pill incorrect" id="questionStatus1">Incorrect</span>
+        <div class="question-header-right">
+          <button type="button" class="mini-check-btn" onclick="checkSingleQuestion(1)">Check Answer</button>
+          <span class="status-pill incorrect" id="questionStatus1">Incorrect</span>
+        </div>
       </div>
       <div class="input-row">
         <div class="input-group">
@@ -1941,7 +933,10 @@
     <div class="question incorrect" id="questionCard2">
       <div class="question-header">
         <h3>Question 2: A doctor can modify an HR for a patient treated by one of the teams of which the doctor is a member.</h3>
-        <span class="status-pill incorrect" id="questionStatus2">Incorrect</span>
+        <div class="question-header-right">
+          <button type="button" class="mini-check-btn" onclick="checkSingleQuestion(2)">Check Answer</button>
+          <span class="status-pill incorrect" id="questionStatus2">Incorrect</span>
+        </div>
       </div>
       <div class="input-row">
         <div class="input-group">
@@ -1968,7 +963,10 @@
     <div class="question incorrect" id="questionCard3">
       <div class="question-header">
         <h3>Question 3: A patient can modify their own HR.</h3>
-        <span class="status-pill incorrect" id="questionStatus3">Incorrect</span>
+        <div class="question-header-right">
+          <button type="button" class="mini-check-btn" onclick="checkSingleQuestion(3)">Check Answer</button>
+          <span class="status-pill incorrect" id="questionStatus3">Incorrect</span>
+        </div>
       </div>
       <div class="input-row">
         <div class="input-group">
@@ -1995,7 +993,10 @@
     <div class="question incorrect" id="questionCard4">
       <div class="question-header">
         <h3>Question 4: An agent can read and modify an HR of a patient for which they are an agent.</h3>
-        <span class="status-pill incorrect" id="questionStatus4">Incorrect</span>
+        <div class="question-header-right">
+          <button type="button" class="mini-check-btn" onclick="checkSingleQuestion(4)">Check Answer</button>
+          <span class="status-pill incorrect" id="questionStatus4">Incorrect</span>
+        </div>
       </div>
       <div class="input-row">
         <div class="input-group">
@@ -2022,7 +1023,10 @@
     <div class="question incorrect" id="questionCard5">
       <div class="question-header">
         <h3>Question 5: A doctor can modify an HR item for a patient treated by one of the teams of which the doctor is a member, if the topics of the item are among the doctor’s specialties.</h3>
-        <span class="status-pill incorrect" id="questionStatus5">Incorrect</span>
+        <div class="question-header-right">
+          <button type="button" class="mini-check-btn" onclick="checkSingleQuestion(5)">Check Answer</button>
+          <span class="status-pill incorrect" id="questionStatus5">Incorrect</span>
+        </div>
       </div>
       <div class="input-row">
         <div class="input-group">
@@ -2048,8 +1052,14 @@
 
     <div class="question incorrect" id="questionCard6">
       <div class="question-header">
-        <h3>Question 6: The author of an HR item can read and delete it.</h3>
-        <span class="status-pill incorrect" id="questionStatus6">Incorrect</span>
+        <h3>Question <span id="duckTrigger6" onclick="launchDuckRain()"
+      onmouseenter="this.textContent='7'"
+      onmouseleave="this.textContent='6'"
+      style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;">6</span>: The author of an HR item can read and delete it.</h3>
+        <div class="question-header-right">
+          <button type="button" class="mini-check-btn" onclick="checkSingleQuestion(6)">Check Answer</button>
+          <span class="status-pill incorrect" id="questionStatus6">Incorrect</span>
+        </div>
       </div>
       <div class="input-row">
         <div class="input-group">
@@ -2074,41 +1084,22 @@
     </div>
 
     <div class="actions">
-      <button type="button" class="primary-btn" onclick="sendToApi()">Send to API</button>
+      <button type="button" class="primary-btn" onclick="sendToApi()">Check Answers</button>
       <button type="button" class="secondary-btn" onclick="clearSavedInputs()">Clear Saved Inputs</button>
     </div>
 
     <div class="status" id="status">Ready</div>
 
-    <div class="debug-wrap">
-      <div class="toggle-actions">
-        <button type="button" class="toggle-btn" id="btn-debug-request" onclick="toggleDebugPanel('debug-request')">
-          Show JSON being sent
-        </button>
-        <button type="button" class="toggle-btn" id="btn-debug-response" onclick="toggleDebugPanel('debug-response')">
-          Show JSON received
-        </button>
-      </div>
-
-      <div class="toggle-panel" id="panel-debug-request">
-        <div class="toggle-panel-header">JSON being sent</div>
-        <div class="toggle-panel-body">
-          <div class="debug" id="debugRequest">JSON being sent will appear here...</div>
-        </div>
-      </div>
-
-      <div class="toggle-panel" id="panel-debug-response">
-        <div class="toggle-panel-header">JSON received from server</div>
-        <div class="toggle-panel-body">
-          <div class="debug" id="debugResponse">JSON received from server will appear here...</div>
-        </div>
-      </div>
-    </div>
-
     <section class="student-rules-section">
       <div class="rule-summary-card incorrect" id="allRulesCard">
         <div class="rule-summary-header">
           <div class="rule-summary-title">All Student Rules</div>
+          <div style="text-align:right;">
+            <h3 style="margin:0;">Screenshot this section for your submission</h3>
+            <div id="totalScore" style="font-weight:800; color:#a6192e; margin-top:6px;">
+              Score: 0 / 60
+            </div>
+          </div>
         </div>
         <div class="student-rules-grid" id="allRules"></div>
       </div>
@@ -2116,7 +1107,7 @@
   </div>
 
   <script>
-    const API_IP = "15.204.118.48";
+    const API_IP = "100.94.167.31";
     const API_PORT = "4989";
     const API_PROTOCOL = "http";
     const API_PATH = "/feedback";
@@ -2152,9 +1143,13 @@
       return `rule(${data.subject_condition}; ${data.resource_condition}; ${data.constraint}; ${data.actions})`;
     }
 
-    function buildPayload() {
+    function buildPayload(questionNumbers = null) {
+      const nums = Array.isArray(questionNumbers) && questionNumbers.length
+        ? questionNumbers
+        : Array.from({ length: QUESTION_COUNT }, (_, i) => i + 1);
+
       return {
-        questions: Array.from({ length: QUESTION_COUNT }, (_, i) => getQuestionData(i + 1))
+        questions: nums.map(q => getQuestionData(q))
       };
     }
 
@@ -2254,22 +1249,6 @@
       return escapeHtml(arr.join(", "));
     }
 
-    function formatGroundTruthOptions(options) {
-      const arr = normalizeArray(options);
-
-      if (!arr.length) {
-        return `<span class="atomic-empty">None</span>`;
-      }
-
-      return arr
-        .map((optionSet, index) => {
-          const items = normalizeArray(optionSet);
-          const text = items.length ? items.join(", ") : "None";
-          return `<div>Option ${index + 1}: ${escapeHtml(text)}</div>`;
-        })
-        .join("");
-    }
-
     function getBackendRuleText(value) {
       if (!value || typeof value !== "object") return "";
 
@@ -2326,30 +1305,54 @@
       return null;
     }
 
+    function mergeApiData(oldData, newData) {
+      const oldMap = getResultMap(oldData);
+      const newMap = getResultMap(newData);
+      const mergedMap = new Map(oldMap);
+
+      newMap.forEach((value, key) => {
+        mergedMap.set(key, { ...(mergedMap.get(key) || {}), ...value });
+      });
+
+      return {
+        results: Array.from(mergedMap.values()).sort((a, b) => (a.question_number || 0) - (b.question_number || 0))
+      };
+    }
+
+    function formatScore(value) {
+      if (!Number.isFinite(value)) return "0";
+      const rounded = Math.round(value * 100) / 100;
+      return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(2);
+    }
+
     function updateAllRules(apiData = null) {
       const allRulesBox = document.getElementById("allRules");
       const card = document.getElementById("allRulesCard");
+      const scoreBox = document.getElementById("totalScore");
+
       if (!allRulesBox || !card) return;
 
       const resultsMap = getResultMap(apiData);
       const items = [];
       let anyCorrect = false;
+      let totalScore = 0;
 
       for (let i = 1; i <= QUESTION_COUNT; i++) {
         const data = getQuestionData(i);
         const studentRuleText = buildRuleStringFromData(data);
 
-        let backendRuleText = "";
         let isCorrect = false;
-
         const resultItem = resultsMap.get(i);
+
         if (resultItem) {
           const parsedFeedback = getFeedbackParsed(resultItem);
 
-          backendRuleText =
-            getBackendRuleText(resultItem) ||
-            getBackendRuleText(resultItem.rule) ||
-            getBackendRuleText(parsedFeedback);
+          if (parsedFeedback && parsedFeedback.acl_jacc_val != null) {
+            const val = Number(parsedFeedback.acl_jacc_val);
+            if (!isNaN(val)) {
+              totalScore += val * 10;
+            }
+          }
 
           if (parsedFeedback && isPerfectScore(parsedFeedback.acl_jacc_val)) {
             isCorrect = true;
@@ -2366,10 +1369,6 @@
                   <span class="rule-block-label">rule(student input)</span>
                   <div class="rule-summary-rule-text">${escapeHtml(studentRuleText)}</div>
                 </div>
-                <div class="rule-block">
-                  <span class="rule-block-label">rule(backend generated)</span>
-                  <div class="rule-summary-rule-text">${escapeHtml(backendRuleText || "No backend rule returned")}</div>
-                </div>
               </div>
             </div>
             <span class="status-pill ${isCorrect ? "correct" : "incorrect"}">
@@ -2382,6 +1381,10 @@
       allRulesBox.innerHTML = items.join("");
       card.classList.remove("correct", "incorrect");
       card.classList.add(anyCorrect ? "correct" : "incorrect");
+
+      if (scoreBox) {
+        scoreBox.textContent = `Score: ${formatScore(totalScore)} / 60`;
+      }
     }
 
     function buildSummaryMarkup(parsed) {
@@ -2409,28 +1412,26 @@
 
     function buildToggleButtons(questionNumber, parsed, hasAtomicFeedback) {
       const sections = [
-        { key: "correct_acl", label: `correct_acl (${normalizeArray(parsed.correct_acl).length})` },
-        { key: "student_acl", label: `student_acl (${normalizeArray(parsed.student_acl).length})` },
-        { key: "over_per", label: `over_per (${parsed.over_per_count ?? normalizeArray(parsed.over_per).length})` },
-        { key: "under_per", label: `under_per (${parsed.under_per_count ?? normalizeArray(parsed.under_per).length})` }
+        { key: "correct_acl", label: `Correct ACL(${normalizeArray(parsed.correct_acl).length})`, className: "correct-btn" },
+        { key: "student_acl", label: `Student ACL(${normalizeArray(parsed.student_acl).length})` },
+        { key: "over_per", label: `Over Permissions(${parsed.over_per_count ?? normalizeArray(parsed.over_per).length})` },
+        { key: "under_per", label: `Under Permissions(${parsed.under_per_count ?? normalizeArray(parsed.under_per).length})` }
       ];
 
       if (hasAtomicFeedback) {
-        sections.push({ key: "atomic_feedback", label: "atomic_feedback" });
+        sections.push({ key: "atomic_feedback", label: "atomic rules" });
       }
-
-      sections.push({ key: "raw_feedback", label: "raw_feedback" });
 
       return `
         <div class="toggle-actions">
           ${sections.map(section => `
             <button
               type="button"
-              class="toggle-btn"
+              class="toggle-btn ${section.className || ""}"
               id="btn-${questionNumber}-${section.key}"
               onclick="toggleSection(${questionNumber}, '${section.key}')"
             >
-              Show ${escapeHtml(section.label)}
+              ${escapeHtml(section.label)}
             </button>
           `).join("")}
         </div>
@@ -2460,17 +1461,6 @@
       `;
     }
 
-    function buildRawPanelMarkup(questionNumber, rawText) {
-      return `
-        <div class="toggle-panel" id="panel-${questionNumber}-raw_feedback">
-          <div class="toggle-panel-header">raw_feedback</div>
-          <div class="toggle-panel-body">
-            <pre class="feedback-raw">${escapeHtml(rawText)}</pre>
-          </div>
-        </div>
-      `;
-    }
-
     function buildAtomicSectionCard(sectionKey, sectionData) {
       const isCorrect = !!sectionData?.is_correct;
 
@@ -2488,24 +1478,12 @@
               <div class="atomic-row-value">${formatAtomicItems(sectionData?.student_items)}</div>
             </div>
             <div class="atomic-row">
-              <div class="atomic-row-label">Expected atomic rule(s)</div>
-              <div class="atomic-row-value">${formatAtomicItems(sectionData?.ground_truth_items)}</div>
-            </div>
-            <div class="atomic-row">
-              <div class="atomic-row-label">Correct atomic rule(s)</div>
+              <div class="atomic-row-label">Your Correct atomic rule(s)</div>
               <div class="atomic-row-value">${formatAtomicItems(sectionData?.correct_items)}</div>
             </div>
             <div class="atomic-row">
-              <div class="atomic-row-label">Incorrect atomic rule(s)</div>
+              <div class="atomic-row-label">Your Incorrect atomic rule(s)</div>
               <div class="atomic-row-value">${formatAtomicItems(sectionData?.incorrect_items)}</div>
-            </div>
-            <div class="atomic-row">
-              <div class="atomic-row-label">Missing atomic rule(s)</div>
-              <div class="atomic-row-value">${formatAtomicItems(sectionData?.missing_items)}</div>
-            </div>
-            <div class="atomic-row">
-              <div class="atomic-row-label">All valid ground truth option(s)</div>
-              <div class="atomic-row-value">${formatGroundTruthOptions(sectionData?.all_ground_truth_options)}</div>
             </div>
           </div>
         </div>
@@ -2518,7 +1496,7 @@
 
       return `
         <div class="toggle-panel" id="panel-${questionNumber}-atomic_feedback">
-          <div class="toggle-panel-header">atomic_feedback</div>
+          <div class="toggle-panel-header">atomic rules</div>
           <div class="toggle-panel-body">
             <div class="atomic-wrap">
               <div class="atomic-header">
@@ -2536,19 +1514,18 @@
       `;
     }
 
-    function renderParsedFeedback(questionNumber, parsed, rawText, atomicFeedback) {
+    function renderParsedFeedback(questionNumber, parsed, atomicFeedback) {
       const feedbackBox = document.getElementById(`feedback${questionNumber}`);
       if (!feedbackBox) return;
 
       feedbackBox.innerHTML = `
         ${buildSummaryMarkup(parsed)}
         ${buildToggleButtons(questionNumber, parsed, !!atomicFeedback)}
-        ${buildPanelMarkup(questionNumber, "correct_acl", "correct_acl", normalizeArray(parsed.correct_acl))}
-        ${buildPanelMarkup(questionNumber, "student_acl", "student_acl", normalizeArray(parsed.student_acl))}
-        ${buildPanelMarkup(questionNumber, "over_per", "over_per", normalizeArray(parsed.over_per))}
-        ${buildPanelMarkup(questionNumber, "under_per", "under_per", normalizeArray(parsed.under_per))}
+        ${buildPanelMarkup(questionNumber, "correct_acl", `Correct ACL(${normalizeArray(parsed.correct_acl).length})`, normalizeArray(parsed.correct_acl))}
+        ${buildPanelMarkup(questionNumber, "student_acl", `Student ACL(${normalizeArray(parsed.student_acl).length})`, normalizeArray(parsed.student_acl))}
+        ${buildPanelMarkup(questionNumber, "over_per", `Over Permissions(${parsed.over_per_count ?? normalizeArray(parsed.over_per).length})`, normalizeArray(parsed.over_per))}
+        ${buildPanelMarkup(questionNumber, "under_per", `Under Permissions(${parsed.under_per_count ?? normalizeArray(parsed.under_per).length})`, normalizeArray(parsed.under_per))}
         ${atomicFeedback ? buildAtomicPanelMarkup(questionNumber, atomicFeedback) : ""}
-        ${buildRawPanelMarkup(questionNumber, rawText)}
       `;
     }
 
@@ -2566,20 +1543,11 @@
               id="btn-${questionNumber}-atomic_feedback"
               onclick="toggleSection(${questionNumber}, 'atomic_feedback')"
             >
-              Show atomic_feedback
+              atomic rules
             </button>
           ` : ""}
-          <button
-            type="button"
-            class="toggle-btn"
-            id="btn-${questionNumber}-raw_feedback"
-            onclick="toggleSection(${questionNumber}, 'raw_feedback')"
-          >
-            Show raw_feedback
-          </button>
         </div>
         ${atomicFeedback ? buildAtomicPanelMarkup(questionNumber, atomicFeedback) : ""}
-        ${buildRawPanelMarkup(questionNumber, text)}
       `;
     }
 
@@ -2599,7 +1567,7 @@
         const atomicFeedback = getAtomicFeedback(item, parsed);
 
         if (parsed && typeof parsed === "object") {
-          renderParsedFeedback(i, parsed, item.feedback_message || "", atomicFeedback);
+          renderParsedFeedback(i, parsed, atomicFeedback);
           setQuestionState(i, isPerfectScore(parsed.acl_jacc_val));
         } else {
           renderPlainFeedback(i, item.feedback_message || "No feedback returned.", atomicFeedback);
@@ -2609,6 +1577,32 @@
 
       updateAllRules(apiData);
     }
+
+    window.launchDuckRain = function launchDuckRain() {
+      const duckEmojis = ["6", "7"];
+      const total = 40;
+
+      for (let i = 0; i < total; i++) {
+        const duck = document.createElement("div");
+        duck.textContent = duckEmojis[Math.floor(Math.random() * duckEmojis.length)];
+        duck.style.position = "fixed";
+        duck.style.top = "-40px";
+        duck.style.left = `${Math.random() * 100}vw`;
+        duck.style.fontSize = `${24 + Math.random() * 26}px`;
+        duck.style.pointerEvents = "none";
+        duck.style.zIndex = "9999";
+        duck.style.transition = "transform 3s linear, opacity 3s linear";
+        duck.style.opacity = "1";
+        document.body.appendChild(duck);
+
+        requestAnimationFrame(() => {
+          duck.style.transform = `translate(${(Math.random() - 0.5) * 220}px, 110vh) rotate(${(Math.random() - 0.5) * 720}deg)`;
+          duck.style.opacity = "0";
+        });
+
+        setTimeout(() => duck.remove(), 3200);
+      }
+    };
 
     function toggleSection(questionNumber, key) {
       const panel = document.getElementById(`panel-${questionNumber}-${key}`);
@@ -2621,30 +1615,21 @@
       if (isVisible) {
         panel.classList.remove("visible");
         button.classList.remove("active");
-        button.textContent = button.textContent.replace(/^Hide /, "Show ");
       } else {
         panel.classList.add("visible");
         button.classList.add("active");
-        button.textContent = button.textContent.replace(/^Show /, "Hide ");
       }
     }
 
-    function toggleDebugPanel(key) {
-      const panel = document.getElementById(`panel-${key}`);
-      const button = document.getElementById(`btn-${key}`);
-
-      if (!panel || !button) return;
-
-      const isVisible = panel.classList.contains("visible");
-
-      if (isVisible) {
-        panel.classList.remove("visible");
-        button.classList.remove("active");
-        button.textContent = button.textContent.replace(/^Hide /, "Show ");
-      } else {
-        panel.classList.add("visible");
-        button.classList.add("active");
-        button.textContent = button.textContent.replace(/^Show /, "Hide ");
+    function setupQuestionSixDuckTrigger() {
+      const trigger = document.getElementById("duckTrigger6");
+      if (trigger && !trigger.dataset.bound) {
+        trigger.addEventListener("click", function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          window.launchDuckRain();
+        });
+        trigger.dataset.bound = "true";
       }
     }
 
@@ -2655,10 +1640,12 @@
       }
     }
 
-    function clearFeedback() {
-      for (let i = 1; i <= QUESTION_COUNT; i++) {
-        resetFeedbackBox(i);
-      }
+    function clearFeedback(questionNumbers = null) {
+      const nums = Array.isArray(questionNumbers) && questionNumbers.length
+        ? questionNumbers
+        : Array.from({ length: QUESTION_COUNT }, (_, i) => i + 1);
+
+      nums.forEach(q => resetFeedbackBox(q));
     }
 
     function clearSavedInputs() {
@@ -2676,26 +1663,27 @@
 
       resetQuestionStates();
       updateAllRules();
-
-      document.getElementById("debugRequest").textContent = "JSON being sent will appear here...";
-      document.getElementById("debugResponse").textContent = "JSON received from server will appear here...";
+      setupQuestionSixDuckTrigger();
       document.getElementById("status").textContent = "Saved inputs cleared.";
     }
 
-    async function sendToApi() {
+    async function requestFeedback(questionNumbers = null) {
       const statusBox = document.getElementById("status");
-      const requestBox = document.getElementById("debugRequest");
-      const responseBox = document.getElementById("debugResponse");
-      const payload = buildPayload();
+      const payload = buildPayload(questionNumbers);
       const apiUrl = buildApiUrl();
+      const isSingle = Array.isArray(questionNumbers) && questionNumbers.length === 1;
 
-      requestBox.textContent = JSON.stringify(payload, null, 2);
-      clearFeedback();
-      resetQuestionStates();
-      updateAllRules();
+      clearFeedback(questionNumbers || undefined);
+      if (isSingle) {
+        setQuestionState(questionNumbers[0], false);
+      } else {
+        resetQuestionStates();
+      }
+      updateAllRules(window.lastApiData || null);
 
-      statusBox.textContent = `Sending to ${apiUrl} ...`;
-      responseBox.textContent = "Waiting for server response...";
+      statusBox.textContent = isSingle
+        ? `Checking Question ${questionNumbers[0]}...`
+        : "Checking all answers...";
 
       try {
         const response = await fetch(apiUrl, {
@@ -2707,7 +1695,6 @@
         });
 
         const rawText = await response.text();
-        responseBox.textContent = rawText;
 
         if (!response.ok) {
           statusBox.textContent = `Status: ${response.status} ${response.statusText}`;
@@ -2722,26 +1709,38 @@
           return;
         }
 
-        window.lastApiData = data;
-        renderFeedback(data);
-        statusBox.textContent = `Status: ${response.status} ${response.statusText}\n\nResponse received and feedback updated on page.`;
+        window.lastApiData = mergeApiData(window.lastApiData, data);
+        renderFeedback(window.lastApiData);
+        statusBox.textContent = isSingle
+          ? `Question ${questionNumbers[0]} checked.`
+          : "All answers checked.";
       } catch (error) {
         statusBox.textContent = `Request failed:\n${error}`;
-        responseBox.textContent = String(error);
       }
+    }
+
+    function sendToApi() {
+      return requestFeedback();
+    }
+
+    function checkSingleQuestion(questionNumber) {
+      return requestFeedback([questionNumber]);
     }
 
     window.lastApiData = null;
 
-    loadFormData();
+    document.addEventListener("DOMContentLoaded", function() {
+      loadFormData();
 
-    for (let i = 1; i <= QUESTION_COUNT; i++) {
-      updateAnswer(i);
-      resetFeedbackBox(i);
-    }
+      for (let i = 1; i <= QUESTION_COUNT; i++) {
+        updateAnswer(i);
+        resetFeedbackBox(i);
+      }
 
-    resetQuestionStates();
-    updateAllRules();
+      resetQuestionStates();
+      updateAllRules();
+      setupQuestionSixDuckTrigger();
+    });
   </script>
 </body>
 </html>
